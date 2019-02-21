@@ -35,7 +35,7 @@ public class AsyncTimeServerHandler implements Runnable {
         doAccept();
         try {
             // 允许当前的线程一直阻塞，防止服务端执行完成退出，仅测试时用，实际应用不需要启动独立的线程来处理AsyncTimeServerHandler
-            latch.wait();
+            latch.await();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
