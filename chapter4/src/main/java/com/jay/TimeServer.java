@@ -51,7 +51,7 @@ public class TimeServer {
     private class ChildChannelHandler extends ChannelInitializer<SocketChannel> {
         @Override
         protected void initChannel(SocketChannel ch) throws Exception {
-            // 解决TCP粘包/拆包问题
+            // 解决TCP粘包/拆包问题，由于使用回车作为消息分隔符
             // 在TimeServerHandler之前新增两个解码器：LineBasedFrameDecoder和StringDecoder
             ch.pipeline().addLast(new LineBasedFrameDecoder(1024));
             ch.pipeline().addLast(new StringDecoder());
