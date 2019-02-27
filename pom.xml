@@ -14,6 +14,11 @@
         <module>utils</module>
         <module>chapter1</module>
         <module>chapter2</module>
+        <module>chapter3</module>
+        <module>chapter4</module>
+        <module>chapter5</module>
+        <module>chapter6</module>
+        <module>chapter7</module>
     </modules>
 
     <properties>
@@ -21,6 +26,8 @@
         <netty.version>4.1.33.Final</netty.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <log4j2.version>2.10.0</log4j2.version>
+        <slf4j.version>1.7.25</slf4j.version>
     </properties>
 
     <dependencyManagement>
