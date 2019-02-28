@@ -15,13 +15,20 @@ import java.util.List;
  **/     
 public class MsgPackDecoder extends MessageToMessageDecoder<ByteBuf> {
 
+    private Class decodeClass;
+
+    public MsgPackDecoder(Class clazz){
+        this.decodeClass = clazz;
+    }
+
     @Override
+    @SuppressWarnings("unchecked")
     protected void decode(ChannelHandlerContext ctx, ByteBuf msg, List<Object> out) throws Exception {
         final byte[] array;
         final int length = msg.readableBytes();
         array = new byte[length];
         msg.getBytes(msg.readerIndex(), array, 0, length);
         MessagePack pack = new MessagePack();
-        out.add(pack.read(array, UserInfo.class));
+        out.add(pack.read(array,  decodeClass));
     }
 }

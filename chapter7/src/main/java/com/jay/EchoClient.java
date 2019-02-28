@@ -44,9 +44,9 @@ public class EchoClient {
                         @Override
                         protected void initChannel(SocketChannel ch) throws Exception {
                             ch.pipeline().addLast("frameDecoder",new LengthFieldBasedFrameDecoder(65535,0,2,0,2));
-                            ch.pipeline().addLast("msgpack decoder", new MsgPackDecoder());
+                            ch.pipeline().addLast("msgpack decoder", new MsgPackDecoder(UserInfo.class));
                             ch.pipeline().addLast("frameEncoder", new LengthFieldPrepender(2));
-                            ch.pipeline().addLast("msgpack encoder", new MsgPackEncoder());
+                            ch.pipeline().addLast("msgpack encoder", new MsgPackEncoder<>(UserInfo.class));
                             ch.pipeline().addLast(new EchoClientHandler(10));
                         }
                     });
