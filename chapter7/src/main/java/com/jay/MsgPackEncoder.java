@@ -7,7 +7,7 @@ import org.msgpack.MessagePack;
 
 /**
  * @ClassName MsgPackEncoder
- * @Description Message Pack编码器
+ * @Description Message Pack编码器,对自定义的对象进行编码
  * @Author lufangjie
  * @Version 1.0
  **/     

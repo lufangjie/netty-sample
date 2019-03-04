@@ -25,6 +25,8 @@ public class EchoClient {
     private final int port;
     private final int sendNumber;
 
+    private static final int SHORT_INTEGER = 65535;
+
     EchoClient(String host, int port, int sendNumber) {
         this.host = host;
         this.port = port;
@@ -43,7 +45,17 @@ public class EchoClient {
                     .handler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         protected void initChannel(SocketChannel ch) throws Exception {
-                            ch.pipeline().addLast("frameDecoder",new LengthFieldBasedFrameDecoder(65535,0,2,0,2));
+                            // 解决TCP粘包和半包问题
+                            // 在自定义的编码器前添加半包编码器LengthFieldPrepender，它将在ByteBuf之前增加2个字节的消息长度字段
+                            // +----------------+       +--------+---------------+
+                            // + "Hello, World" +   =>  + Ox000C | "Hello,World" +
+                            // +----------------+       +--------+---------------+
+                            // 在自定义的解码器前添加解码器LengthFieldBasedFrameDecoder，用于处理半包消息，这样后面的MsgPackDecoder接受到的消息永远是整包消息
+                            // +-------------------------+       +----------------+
+                            // + Length | Actual Content +   =>  + Actual Content +
+                            // + 0x000c | "Hello,World"  +       + "Hello,World"  +
+                            // +-------------------------+       +----------------+
+                            ch.pipeline().addLast("frameDecoder",new LengthFieldBasedFrameDecoder(SHORT_INTEGER,0,2,0,2));
                             ch.pipeline().addLast("msgpack decoder", new MsgPackDecoder(UserInfo.class));
                             ch.pipeline().addLast("frameEncoder", new LengthFieldPrepender(2));
                             ch.pipeline().addLast("msgpack encoder", new MsgPackEncoder<>(UserInfo.class));

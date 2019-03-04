@@ -9,7 +9,7 @@ import java.util.List;
 
 /**
  * @ClassName MsgPackDecoder
- * @Description Message Pack解码器
+ * @Description Message Pack解码器,对自定义的对象进行解码
  * @Author lufangjie
  * @Version 1.0
  **/     
