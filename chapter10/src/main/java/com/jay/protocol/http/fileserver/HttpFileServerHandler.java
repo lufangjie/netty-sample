@@ -88,7 +88,7 @@ public class HttpFileServerHandler extends SimpleChannelInboundHandler<FullHttpR
         HttpUtil.setContentLength(response, fileLength);
         setContentTypeHeader(response, file);
         if (HttpUtil.isKeepAlive(request)) {
-            response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderNames.CONNECTION);
+            response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
         }
         ctx.write(response);
         ChannelFuture sendFileFuture;
@@ -113,6 +113,7 @@ public class HttpFileServerHandler extends SimpleChannelInboundHandler<FullHttpR
         // 同时调用flush方法将之前在缓冲区的消息刷新到SocketChannel中发送给对方
         // 如果是非Keep-Alive状态，最后一包消息发送完完成之后，服务端要主动关闭连接
         ChannelFuture lastFuture = ctx.writeAndFlush(LastHttpContent.EMPTY_LAST_CONTENT);
+        // 如果当前连接请求非Keep-Alive ，最后一包消息发送完成后 服务器主动关闭连接
         if (!HttpUtil.isKeepAlive(request)) {
             lastFuture.addListener(ChannelFutureListener.CLOSE);
         }
@@ -196,12 +197,22 @@ public class HttpFileServerHandler extends SimpleChannelInboundHandler<FullHttpR
         ByteBuf buffer = Unpooled.copiedBuffer(buf, CharsetUtil.UTF_8);
         response.content().writeBytes(buffer);
         buffer.release();
+        // 使用ctx对象写出并且刷新到SocketChannel中去 并主动关闭连接(这里是指关闭处理发送数据的线程连接)
         ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
     }
 
+    /**
+     * 重定向操作
+     * @param ctx
+     * @param newUri 新的uri
+     *
+     **/
     private static void sendRedirect(ChannelHandlerContext ctx, String newUri) {
+        // 建立响应对象
         FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.FOUND);
+        // 设置新的请求地址放入响应对象中去
         response.headers().set(HttpHeaderNames.LOCATION, newUri);
+        // 使用ctx对象写出并且刷新到SocketChannel中去 并主动关闭连接(这里是指关闭处理发送数据的线程连接)
         ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
     }
 
@@ -212,6 +223,7 @@ public class HttpFileServerHandler extends SimpleChannelInboundHandler<FullHttpR
     }
 
     private static void setContentTypeHeader(HttpResponse response, File file) {
+        // 使用mime对象获取文件类型
         MimetypesFileTypeMap mimeTypesMap = new MimetypesFileTypeMap();
         response.headers().set(HttpHeaderNames.CONTENT_TYPE,
                 mimeTypesMap.getContentType(file.getPath()));
