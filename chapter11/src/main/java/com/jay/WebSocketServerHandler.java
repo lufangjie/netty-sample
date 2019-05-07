@@ -6,14 +6,12 @@ import com.jay.entity.Client;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
+import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http.websocketx.*;
 import io.netty.util.CharsetUtil;
 import lombok.extern.slf4j.Slf4j;
 
-
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static io.netty.handler.codec.http.HttpResponseStatus.*;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
@@ -30,7 +28,10 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 
     private WebSocketServerHandshaker handshaker;
 
-//    private static Map<String, Client> clientMap = new ConcurrentHashMap<>();
+    @Override
+    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        ChannelHolder.addChannel(ctx.channel().id().asLongText(), (SocketChannel) ctx.channel());
+    }
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Object msg){
@@ -131,6 +132,6 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 
     @Override
     public void handlerRemoved(ChannelHandlerContext ctx) {
-
+        ChannelHolder.removeChannel(ctx.channel().id().asLongText());
     }
 }
